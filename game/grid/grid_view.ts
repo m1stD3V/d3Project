@@ -1,8 +1,14 @@
 // The only folder allowed to import Phaser, and for one job: drawing the grid.
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
-import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { terrainAt } from "../../core/mod.ts";
+import type {
+  Cell,
+  GameEvent,
+  GameState,
+  ItemId,
+  Terrain,
+} from "../../core/mod.ts";
+import { cellKey, itemAt, terrainAt } from "../../core/mod.ts";
 
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -13,10 +19,22 @@ const MARKER_COLOR = 0xf5e6a8;
 const BUMP_COLOR = 0xe0533d;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
-  grass: 0x5d9e4a,
-  forest: 0x2f6b3a,
-  water: 0x2d5f9e,
-  rock: 0x6e6a66,
+  crash: 0x8a8f98,
+  wasteland: 0x7a8f2a,
+  impact: 0x6b4a3a,
+  settlement: 0x4a8f8a,
+  chasm: 0x0b0b10,
+};
+
+const ITEM_COLORS: Record<ItemId, number> = {
+  uranium: 0xb6ff3c,
+  iron: 0xc9c2b8,
+  platinum: 0xe8f4ff,
+  water: 0x5ec8ff,
+  scrap: 0xd89a3a,
+  fuel: 0xff7a3c,
+  hullPlate: 0x9aa4b0,
+  wrench: 0xffffff,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -38,11 +56,13 @@ export class GridView extends Phaser.Scene {
   private readonly start: Cell;
   private ground!: Phaser.GameObjects.Graphics;
   private marker!: Phaser.GameObjects.Arc;
+  private readonly collected: Set<string>;
 
   constructor(state: GameState) {
     super("grid");
     this.seed = state.seed;
     this.start = { ...state.player };
+    this.collected = new Set(state.taken);
   }
 
   create() {
@@ -82,6 +102,13 @@ export class GridView extends Phaser.Scene {
         return this.walk(event.to);
       case "blocked":
         return this.bump(event.at, event.toward);
+      case "gathered":
+        this.collected.add(cellKey(event.at.x, event.at.y));
+        this.drawCellsAround(event.at);
+        return this.pickUp();
+      case "crafted":
+      case "refused":
+        return Promise.resolve();
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
@@ -120,6 +147,18 @@ export class GridView extends Phaser.Scene {
     });
   }
 
+  private pickUp(): Promise<void> {
+    return new Promise((done) => {
+      this.tweens.add({
+        targets: this.marker,
+        scale: 1.4,
+        duration: 70,
+        yoyo: true,
+        onComplete: () => done(),
+      });
+    });
+  }
+
   // Paint only what is near the camera. Asking the core again costs little, and
   // the world itself is never stored.
   private drawCellsAround({ x: centerX, y: centerY }: Cell) {
@@ -133,6 +172,12 @@ export class GridView extends Phaser.Scene {
           CELL_SIZE - 1,
           CELL_SIZE - 1,
         );
+        const item = itemAt(this.seed, x, y);
+        if (item && !this.collected.has(cellKey(x, y))) {
+          const { x: cx, y: cy } = cellCenter({ x, y });
+          this.ground.fillStyle(ITEM_COLORS[item]);
+          this.ground.fillCircle(cx, cy, CELL_SIZE * 0.18);
+        }
       }
     }
   }

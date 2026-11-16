@@ -1,4 +1,4 @@
-import { apply, type Command, type Direction } from "../core/mod.ts";
+import { apply, type Command, type Direction, RECIPES } from "../core/mod.ts";
 import type { GameState } from "../core/mod.ts";
 import type { Presenter } from "./presenter.ts";
 
@@ -33,23 +33,34 @@ export class Controller {
     };
     addEventListener("keydown", (event) => this.keyDown(event));
     addEventListener("keyup", (event) => this.keyUp(event));
-    addEventListener("blur", () => this.held = []);
+    addEventListener("blur", () => (this.held = []));
+  }
+
+  private commandFor(event: KeyboardEvent): Command | null {
+    const direction = ARROWS[event.key];
+    if (direction) return { type: "move", direction };
+    if (event.code === "KeyE") return { type: "gather" };
+    const recipe = RECIPES[Number(event.key) - 1];
+    if (recipe) return { type: "craft", recipe: recipe.id };
+    return null;
   }
 
   private keyDown(event: KeyboardEvent) {
-    const direction = ARROWS[event.key];
-    if (!direction || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const command = this.commandFor(event);
+    if (!command) return;
     // Otherwise arrow keys would also scroll the page.
     event.preventDefault();
     if (event.repeat) return;
-    this.held.push(direction);
-    this.pressed = { type: "move", direction };
+    const direction = ARROWS[event.key];
+    if (direction) this.held.push(direction);
+    this.pressed = command;
     this.next();
   }
 
   private keyUp(event: KeyboardEvent) {
-    this.held = this.held.filter((direction) =>
-      direction !== ARROWS[event.key]
+    this.held = this.held.filter(
+      (direction) => direction !== ARROWS[event.key],
     );
   }
 

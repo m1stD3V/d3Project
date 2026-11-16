@@ -1,3 +1,5 @@
+import { gridValue, type Terrain, terrainAt } from "./terrain.ts";
+
 export type ItemId =
   | "uranium"
   | "iron"
@@ -10,7 +12,7 @@ export type ItemId =
 
 export type Inventory = Partial<Record<ItemId, number>>;
 
-export type TerrainName = "wasteland" | "impact" | "settlement" | "crash";
+export type TerrainName = Terrain;
 
 export const ITEM_LABEL: Record<ItemId, string> = {
   uranium: "Uranium",
@@ -23,12 +25,25 @@ export const ITEM_LABEL: Record<ItemId, string> = {
   wrench: "Wrench",
 };
 
-export const GATHER: Record<TerrainName, ItemId[]> = {
-  wasteland: ["uranium"],
-  impact: ["iron", "iron", "platinum"],
-  settlement: ["water", "scrap"],
-  crash: [],
+export const SPAWN: Record<TerrainName, { chance: number; items: ItemId[] }> = {
+  wasteland: { chance: 0.08, items: ["uranium"] },
+  impact: { chance: 0.12, items: ["iron", "iron", "platinum"] },
+  settlement: { chance: 0.07, items: ["water", "scrap"] },
+  crash: { chance: 0, items: [] },
+  chasm: { chance: 0, items: [] },
 };
+
+export function cellKey(x: number, y: number): string {
+  return `${x},${y}`;
+}
+
+export function itemAt(seed: number, x: number, y: number): ItemId | null {
+  const { chance, items } = SPAWN[terrainAt(seed, x, y)];
+  if (items.length === 0) return null;
+  const roll = gridValue(seed + 3, x, y);
+  if (roll >= chance) return null;
+  return items[Math.floor((roll / chance) * items.length)];
+}
 
 export type Recipe = {
   id: string;

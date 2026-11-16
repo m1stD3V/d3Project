@@ -3,7 +3,9 @@ body {
   margin: 0;
   background: #14161a;
   color: #e8e4da;
-  font: 14px system-ui, sans-serif;
+  font:
+    14px system-ui,
+    sans-serif;
 }
 
 #app {
@@ -80,4 +82,11 @@ body {
     transparent 55%,
     rgb(0 0 0 / 0.5) 100%
   );
+}
+
+#inventory {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: monospace;
 }
