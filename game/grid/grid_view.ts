@@ -35,6 +35,8 @@ const ITEM_COLORS: Record<ItemId, number> = {
   fuel: 0xff7a3c,
   hullPlate: 0x9aa4b0,
   wrench: 0xffffff,
+  ladder: 0x8b5a2b,
+  darkMatter: 0x6a0dad,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
