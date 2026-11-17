@@ -36,6 +36,12 @@ export class Controller {
     addEventListener("blur", () => (this.held = []));
   }
 
+  // Allow page elements like recipe buttons to enqueue commands through the mediator
+  dispatch(command: Command) {
+    this.pressed = command;
+    this.next();
+  }
+
   private commandFor(event: KeyboardEvent): Command | null {
     const direction = ARROWS[event.key];
     if (direction) return { type: "move", direction };

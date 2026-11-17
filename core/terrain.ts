@@ -1,3 +1,4 @@
+import type { Inventory } from "./items.ts";
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
 
@@ -14,8 +15,12 @@ export function terrainAt(seed: number, x: number, y: number): Terrain {
   return noise(seed + 2, x, y, 6) < 0.6 ? "wasteland" : "settlement";
 }
 
-export function isPassable(terrain: Terrain): boolean {
-  return terrain !== "chasm";
+export function isPassable(
+  terrain: Terrain,
+  inventory: Inventory = {},
+): boolean {
+  if (terrain !== "chasm") return true;
+  return (inventory.ladder ?? 0) >= 1;
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so

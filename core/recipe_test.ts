@@ -1,6 +1,8 @@
 import { assert, assertEquals } from "@std/assert";
-import { apply, type GameState, newGame, RECIPES, SPAWN } from "./mod.ts";
+import { apply, newGame, RECIPES, SPAWN } from "./mod.ts";
 
+//Recipe content and rule tests: check that every ingredient has a source,
+// failed crafts change nothing, and successful crafts deduct materials dynamically
 Deno.test("every recipe ingredient has a source", () => {
   const sources = new Set<string>();
 
