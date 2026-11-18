@@ -63,6 +63,16 @@ Deno.test("crafting spends materials and grants player correct item", () => {
   }
 });
 
+Deno.test("crafting away from required terrain is refused and changes nothing", () => {
+  const state = newGame(121);
+  state.player = { x: 6, y: 0 }; // wasteland, away from crash site
+  state.inventory = { iron: 2, scrap: 1 };
+  const snapshot = JSON.parse(JSON.stringify(state));
+  const events = apply(state, { type: "craft", recipe: "wrench" });
+  assertEquals(state, snapshot);
+  assertEquals(events, [{ type: "refused", reason: "must craft at crash" }]);
+});
+
 Deno.test("a crafted event remains unchanged when crafting again", () => {
   const recipe = RECIPES[0];
   const state = newGame(121);
