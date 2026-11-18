@@ -10,7 +10,8 @@ export type ItemId =
   | "hullPlate"
   | "wrench"
   | "ladder"
-  | "darkMatter";
+  | "darkMatter"
+  | "finalShip";
 
 export type Inventory = Partial<Record<ItemId, number>>;
 
@@ -27,6 +28,7 @@ export const ITEM_LABEL: Record<ItemId, string> = {
   wrench: "Wrench",
   ladder: "Ladder",
   darkMatter: "Dark Matter",
+  finalShip: "Final Ship",
 };
 
 export const SPAWN: Record<TerrainName, { chance: number; items: ItemId[] }> = {
@@ -87,6 +89,14 @@ export const RECIPES: Recipe[] = [
     label: "Ladder",
     makes: "ladder",
     needs: { scrap: 3 },
+    at: "crash",
+    tool: "wrench",
+  },
+  {
+    id: "finalShip",
+    label: "Final Ship",
+    makes: "finalShip",
+    needs: { fuel: 1, hullPlate: 2 },
     at: "crash",
     tool: "wrench",
   },

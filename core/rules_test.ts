@@ -18,7 +18,13 @@ function besideEasternCell(passable: boolean): GameState {
     const here = isPassable(terrainAt(SEED, x, 0));
     const east = isPassable(terrainAt(SEED, x + 1, 0));
     if (here && east === passable) {
-      return { seed: SEED, player: { x, y: 0 }, inventory: {}, taken: [] };
+      return {
+        seed: SEED,
+        player: { x, y: 0 },
+        inventory: {},
+        taken: [],
+        ended: false,
+      };
     }
   }
   throw new Error("Found no suitable cell on this row.");

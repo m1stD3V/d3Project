@@ -26,6 +26,8 @@ function describe(event: GameEvent): string {
       return `crafted ${ITEM_LABEL[event.item]}`;
     case "refused":
       return event.reason;
+    case "ended":
+      return "repaired the ship and escaped !";
   }
 }
 
@@ -54,6 +56,9 @@ export class Hud {
       if (recipe) spend(this.counts, recipe);
       add(this.counts, event.item);
       this.showInventory();
+    }
+    if (event.type === "ended") {
+      element("victory").hidden = false;
     }
   }
 

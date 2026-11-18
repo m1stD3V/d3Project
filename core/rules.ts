@@ -25,6 +25,7 @@ export type GameState = {
   player: Cell;
   inventory: Inventory;
   taken: string[];
+  ended: boolean;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -39,7 +40,8 @@ export type GameEvent =
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
   | { type: "gathered"; at: Cell; item: ItemId }
   | { type: "crafted"; item: ItemId }
-  | { type: "refused"; reason: string };
+  | { type: "refused"; reason: string }
+  | { type: "ended" };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -50,11 +52,19 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, inventory: {}, taken: [] };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    inventory: {},
+    taken: [],
+    ended: false,
+  };
 }
 
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
+  if (state.ended) return [];
+
   switch (command.type) {
     case "move":
       return move(state, command.direction);
@@ -102,5 +112,13 @@ function craft(state: GameState, id: string): GameEvent[] {
   if (reason) return [{ type: "refused", reason }];
   spend(state.inventory, recipe);
   add(state.inventory, recipe.makes);
+
+  if (recipe.id === "finalShip") {
+    state.ended = true;
+    return [
+      { type: "crafted", item: recipe.makes },
+      { type: "ended" },
+    ];
+  }
   return [{ type: "crafted", item: recipe.makes }];
 }
