@@ -34,7 +34,7 @@ export const SPAWN: Record<TerrainName, { chance: number; items: ItemId[] }> = {
   impact: { chance: 0.12, items: ["iron", "iron", "platinum"] },
   settlement: { chance: 0.07, items: ["water", "scrap"] },
   crash: { chance: 0, items: [] },
-  chasm: { chance: 0.01, items: ["darkMatter"] },
+  chasm: { chance: 0.05, items: ["darkMatter"] },
 };
 
 export function cellKey(x: number, y: number): string {

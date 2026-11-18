@@ -62,3 +62,15 @@ Deno.test("crafting spends materials and grants player correct item", () => {
     assertEquals(state.inventory[item as keyof typeof state.inventory], 0);
   }
 });
+
+Deno.test("a crafted event remains unchanged when crafting again", () => {
+  const recipe = RECIPES[0];
+  const state = newGame(121);
+  state.inventory = { iron: 4, scrap: 2 };
+
+  const first = apply(state, { type: "craft", recipe: recipe.id });
+  const second = apply(state, { type: "craft", recipe: recipe.id });
+
+  assertEquals(first, [{ type: "crafted", item: recipe.makes }]);
+  assertEquals(second, [{ type: "crafted", item: recipe.makes }]);
+});
